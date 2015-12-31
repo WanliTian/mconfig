@@ -1,0 +1,14 @@
+{application, mconfig,
+ [
+  {description, ""},
+  {vsn, "1"},
+  {registered, []},
+  {applications, [
+                  kernel,
+                  stdlib
+                 ]},
+  {mod, { mconfig_app, []}},
+  {env, [
+    {delay, 5000}
+  ]}
+ ]}.
