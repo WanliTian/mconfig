@@ -45,18 +45,22 @@ add_config(FilePath) ->
 }).
 
 init(_) ->
+    ets:new(fmon, [named_table, bag, {keypos, 1}, private]),
     List = case mconfig:config_path() of 
         error ->
             [];
         {ok, L} ->
             L
     end,
+    AllPaths = lists:foldl(fun(Path, Pre) ->
+            Pre ++ Path
+        end, [], List),    
     FIList = lists:map(fun([FilePath]) ->
         #file_info{
             file_path = FilePath,
             last_modified = filelib:last_modified(FilePath)
         }
-    end, List),
+    end, AllPaths),
 
     erlang:send_after(self(), mconfig_lib:delay(), scan),
 
@@ -91,6 +95,7 @@ handle_info(scan, State) ->
                 case filelib:last_modified(Path) of 
                     %%file has been removed
                     error ->
+                        lager:error("File Has Been Removed. File Path: ~p~n", [FileInfo]),
                         FileInfo;
                     %%file not been modified
                     Time ->
@@ -113,3 +118,23 @@ terminate(_Reason, _State) ->
 
 code_change(_OldVsn, State, _Extra) ->
     {ok, State}.
+
+sub_configs(FilePath) ->
+    case file:consult(FilePath) of 
+        {ok, Terms} ->
+            iterate_terms(Terms, []);
+        {error, Reason} ->
+            lager:error("Read File Info Error. File Path: ~p~n", [FilePath]),
+            []
+    end.
+
+iterate_terms([], Result) ->
+    Result;
+iterate_terms([T|Tail], Result) ->
+    iterate_terms(Tail, search_sub_file(T, Result)).
+
+%%keep files order for the reason that the back override the front
+search_sub_file([], Result) ->
+    lists:reverse(Result);
+search_sub_file([Str|Tail], Result) io_lib:printable_unicode_list(Str) ->
+    search_sub_file(Tail. [Str | Result]).
