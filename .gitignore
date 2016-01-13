@@ -5,6 +5,6 @@ deps
 *.plt
 erl_crash.dump
 ebin
-rel/erl_consumer
+rel/mconfig
 .concrete/DEV_MODE
 .rebar
