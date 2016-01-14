@@ -46,7 +46,7 @@ handle_call(_Request, _From, State) ->
     {reply, ok, State}.
 
 handle_cast({sub, App, Key, Callback}, State) ->
-    Value = application:get_env(app, Key, undefined),
+    Value = application:get_env(App, Key, undefined),
     ets:insert_new(mconfig_subs, {{App, Key}, Value, Callback}),
     {noreply, State};
 
