@@ -125,7 +125,7 @@ file_info([Path|Tail], Result) ->
     file_info(Tail, [Info|Result]).
 
 app_path() ->
-    [code:where_is_file(mconfig_lib:master_appname())].
+    [code:where_is_file(mconfig_lib:master_appname() ++ ".app")].
 config_path() ->
     {ok, [List]} = init:get_argument(config),
     List.
